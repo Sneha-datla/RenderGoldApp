@@ -42,7 +42,7 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
       condition,
       parseFloat(price),
       description,
-      imageData,
+     imageData,
     ]);
     res.status(201).json({
       message: "Seller gold product added successfully",
