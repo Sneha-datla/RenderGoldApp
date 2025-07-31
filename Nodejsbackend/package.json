@@ -15,6 +15,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "multer": "^2.0.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "pg": "^8.16.2"
   }
 }
