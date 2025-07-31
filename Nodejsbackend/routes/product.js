@@ -1,101 +1,98 @@
+// routes/product.js
 const express = require("express");
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../cloudinary");
-const pool = require("../db"); // PostgreSQL pool
-
+const pool = require("../db");
 const router = express.Router();
+const fs = require("fs");
 
-// ✅ Test route
+// Example route
 router.get("/", (req, res) => {
   res.send("Product route working");
 });
 
-// ✅ Multer storage for Cloudinary
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "products",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-    public_id: (req, file) => Date.now() + "-" + file.originalname,
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
   },
 });
 
 const upload = multer({ storage });
 
-// ✅ Add product with image upload
+// ⬇️ Use `.array()` for multiple files
 router.post("/add", upload.array("image_urls", 10), async (req, res) => {
   const { productId, title, purity, price, stock, featured } = req.body;
   const files = req.files || [];
 
   try {
-    const imageUrls = files.map((file) => file.path);
+    const imagePaths = files.map(file => `/uploads/${file.filename}`);
 
     const result = await pool.query(
-      `INSERT INTO products (product_id, title, purity, price, stock, featured, image_urls, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-       RETURNING *`,
-      [
-        productId,
-        title,
-        purity,
-        parseFloat(price),
-        parseInt(stock),
-        featured === "true",
-        imageUrls,
-      ]
+      `INSERT INTO products (product_id, title, purity, price, stock, featured, image_urls) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [productId, title, purity, price, stock, featured, imagePaths] // ✅ pass JS array directly
     );
 
-    res.status(201).json({
-      message: "Product added",
-      product: result.rows[0],
-    });
+    res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Error adding product:", err.message);
+    console.error(err.message);
     res.status(500).json({ error: "Product creation failed" });
   }
 });
 
-// ✅ Get all products
 router.get("/all", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM products ORDER BY created_at DESC");
+    const result = await pool.query("SELECT * FROM products");
     res.status(200).json(result.rows);
   } catch (err) {
     console.error("Error fetching products:", err.message);
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });
+// DELETE a product by ID
 
-// ✅ Delete product and Cloudinary images
 router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const getPublicIdFromUrl = (url) => {
-    const parts = url.split("/");
-    const filename = parts[parts.length - 1].split(".")[0];
-    return `products/${filename}`;
-  };
+  const id = req.params.id;
 
   try {
-    // Fetch product
-    const result = await pool.query("SELECT * FROM products WHERE id = $1", [id]);
-    if (result.rowCount === 0) {
+    console.log("Attempting to delete product with ID:", id);
+
+    const result = await pool.query(
+      "SELECT image_urls FROM products WHERE id = $1",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    const product = result.rows[0];
-    const imageUrls = product.image_urls || [];
+    let imageUrls = result.rows[0].image_urls;
 
-    // Delete Cloudinary images
-    await Promise.all(
-      imageUrls.map((url) => {
-        const publicId = getPublicIdFromUrl(url);
-        return cloudinary.uploader.destroy(publicId);
-      })
-    );
+    // Parse image URLs safely
+    if (typeof imageUrls === "string") {
+      try {
+        imageUrls = JSON.parse(imageUrls);
+      } catch {
+        imageUrls = imageUrls.split(",").map(url => url.trim());
+      }
+    }
 
-    // Delete product from DB
+    // Delete each image from filesystem
+    imageUrls.forEach((url) => {
+      const filePath = `.${url}`; // Assuming /uploads/...
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
+
+    // Delete product from database
     await pool.query("DELETE FROM products WHERE id = $1", [id]);
 
     res.status(200).json({ message: "Product deleted successfully" });
@@ -104,5 +101,8 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete product" });
   }
 });
+
+
+
 
 module.exports = router;
