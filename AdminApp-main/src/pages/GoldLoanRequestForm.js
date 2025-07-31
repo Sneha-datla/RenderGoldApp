@@ -59,7 +59,7 @@ const GoldLoanRequestForm = () => {
     });
 
     try {
-      const response = await axios.post('https://adminapp-1-nk19.onrender.com/loan/add', data, {
+      const response = await axios.post('https://rendergoldapp-1.onrender.com/loan/add', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -5,7 +5,7 @@ const GoldLoanTable = () => {
   const [loans, setLoans] = useState([]);
   const [activeLoan, setActiveLoan] = useState(null);
 
-  const API_URL = 'https://adminapp-1-nk19.onrender.com/loan/all';
+  const API_URL = 'https://rendergoldapp-1.onrender.com/loan/all';
 
   const fetchLoans = async () => {
     try {
@@ -19,7 +19,7 @@ const GoldLoanTable = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure to delete this loan request?')) {
       try {
-await axios.delete(`https://adminapp-1-nk19.onrender.com/loan/${id}`);
+await axios.delete(`https://rendergoldapp-1.onrender.com/loan/${id}`);
         fetchLoans();
         setActiveLoan(null);
       } catch (error) {
