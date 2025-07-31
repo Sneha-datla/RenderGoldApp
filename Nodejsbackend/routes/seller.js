@@ -27,9 +27,7 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
   const { name, category, weight, purity, condition, price, description } = req.body;
   const files = req.files || [];
 
-  if (files.length === 0) {
-    return res.status(400).json({ error: "No images uploaded" });
-  }
+ 
 
   try {
     const imageData = files.map((file) => file.path);
