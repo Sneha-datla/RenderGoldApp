@@ -13,9 +13,9 @@ router.get("/", (req, res) => {
 
 // ✅ Multer storage for Cloudinary
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
-    folder: "products", // Optional folder name in Cloudinary
+    folder: "products",
     allowed_formats: ["jpg", "png", "jpeg", "webp"],
     public_id: (req, file) => Date.now() + "-" + file.originalname,
   },
