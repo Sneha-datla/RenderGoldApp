@@ -5,7 +5,7 @@ const SellerProductTable = () => {
   const [products, setProducts] = useState([]);
   const [activeProduct, setActiveProduct] = useState(null);
 
-  const API_URL = 'https://adminapp-1-nk19.onrender.com/seller/all';
+  const API_URL = 'https://rendergoldapp-1.onrender.com/seller/all';
 
   const fetchProducts = async () => {
     try {
@@ -20,7 +20,7 @@ const SellerProductTable = () => {
     if (window.confirm('Are you sure to delete this product?')) {
       try {
         // ⚠️ fakestoreapi does not support real deletion, just simulating it
-await axios.delete(`https://adminapp-1-nk19.onrender.com/seller/${id}`);
+await axios.delete(`https://rendergoldapp-1.onrender.com/seller/${id}`);
         alert("Delete simulated (fake store doesn't remove real data)");
         fetchProducts(); // Reload list
         setActiveProduct(null);

@@ -46,7 +46,7 @@ const SellGoldForm = () => {
     });
 
     try {
-      const response = await axios.post('https://adminapp-1-nk19.onrender.com/seller/add', formPayload, {
+      const response = await axios.post('https://rendergoldapp-1.onrender.com/seller/add', formPayload, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
