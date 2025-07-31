@@ -34,12 +34,9 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
   try {
     const imageData = files.map((file) => file.path);
 
-    const query = `
-      INSERT INTO sellergold (name, category, weight, purity, condition, price, description, images)
+    const result = await pool.query( `INSERT INTO sellergold (name, category, weight, purity, condition, price, description, images)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *
-    `;
-    const values = [
+      RETURNING *`,[
       name,
       category,
       weight,
@@ -48,9 +45,7 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
       parseFloat(price),
       description,
       imageData,
-    ];
-
-    const result = await pool.query(query, values);
+    ]);
     res.status(201).json({
       message: "Seller gold product added successfully",
       data: result.rows[0],
