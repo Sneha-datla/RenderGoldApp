@@ -41,7 +41,7 @@ const handleSubmit = async (e) => {
   });
 
   try {
-    const response = await axios.post('https://adminapp-1-nk19.onrender.com/products/add', formData, {
+    const response = await axios.post('https://rendergoldapp-1.onrender.com/products/add', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

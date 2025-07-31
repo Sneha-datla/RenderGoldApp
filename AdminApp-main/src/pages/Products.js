@@ -8,7 +8,7 @@ const Products = () => {
   const [featuredFilter, setFeaturedFilter] = useState('All');
   const [products, setProducts] = useState([]);
 
-  const API_URL = 'https://adminapp-1-nk19.onrender.com/products/all';
+  const API_URL = 'https://rendergoldapp-1.onrender.com/products/all';
 
   useEffect(() => {
     fetchProducts();
