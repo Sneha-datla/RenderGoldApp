@@ -2,18 +2,19 @@ const express = require("express");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../cloudinary"); // Your Cloudinary config
-const pool = require("../db"); // PostgreSQL pool
+const pool = require("../db");
 const router = express.Router();
 
 // ✅ Multer storage using Cloudinary
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
     folder: "goldloan",
     allowed_formats: ["jpg", "png", "jpeg", "webp"],
-    public_id: (req, file) => `${Date.now()}-${file.originalname}`,
+    public_id: (req, file) => Date.now() + "-" + file.originalname,
   },
 });
+
 
 const upload = multer({ storage });
 
@@ -40,7 +41,7 @@ router.post("/add", upload.array("image", 5), async (req, res) => {
   }
 
   try {
-    const imagePaths = files.map((file) => file.path);
+    const imagePaths =files.map((file) => file.path);
     const createdAt = new Date().toISOString();
 
     const result = await pool.query(

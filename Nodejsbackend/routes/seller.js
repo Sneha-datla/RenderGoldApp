@@ -10,9 +10,9 @@ const router = express.Router();
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "seller", // Folder name in Cloudinary
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [{ width: 800, crop: "limit" }],
+    folder: "seller",
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
+    public_id: (req, file) => Date.now() + "-" + file.originalname,
   },
 });
 
@@ -32,11 +32,11 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
   }
 
   try {
-    const imageData =files.map(file => file.path);
+    const imageData = files.map((file) => file.path);
 
     const result = await pool.query( `INSERT INTO sellergold (name, category, weight, purity, condition, price, description, images)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
- RETURNING *`,[
+      RETURNING *`,[
       name,
       category,
       weight,
