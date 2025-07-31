@@ -1,43 +1,39 @@
-// routes/product.js
 const express = require("express");
 const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../cloudinary"); // ➡️ Cloudinary config file
 const pool = require("../db");
 const router = express.Router();
-const fs = require("fs");
 
-// Example route
+// ✅ Test route
 router.get("/", (req, res) => {
   res.send("Product route working");
 });
 
-const uploadDir = "uploads/";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+// ✅ Multer storage with Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "products", // Folder name in Cloudinary
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 800, crop: "limit" }],
   },
 });
 
 const upload = multer({ storage });
 
-// ⬇️ Use `.array()` for multiple files
+// ✅ Add Product Route
 router.post("/add", upload.array("image_urls", 10), async (req, res) => {
   const { productId, title, purity, price, stock, featured } = req.body;
   const files = req.files || [];
 
   try {
-    const imagePaths = files.map(file => `/uploads/${file.filename}`);
+    const imageUrls = files.map(file => file.path); // Cloudinary URLs
 
     const result = await pool.query(
       `INSERT INTO products (product_id, title, purity, price, stock, featured, image_urls) 
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [productId, title, purity, price, stock, featured, imagePaths] // ✅ pass JS array directly
+      [productId, title, purity, price, stock, featured, imageUrls]
     );
 
     res.status(201).json(result.rows[0]);
@@ -47,6 +43,7 @@ router.post("/add", upload.array("image_urls", 10), async (req, res) => {
   }
 });
 
+// ✅ Fetch All Products
 router.get("/all", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM products");
@@ -56,14 +53,12 @@ router.get("/all", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });
-// DELETE a product by ID
 
+// ✅ Delete Product
 router.delete("/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
-    console.log("Attempting to delete product with ID:", id);
-
     const result = await pool.query(
       "SELECT image_urls FROM products WHERE id = $1",
       [id]
@@ -73,26 +68,11 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    let imageUrls = result.rows[0].image_urls;
+    const imageUrls = result.rows[0].image_urls;
 
-    // Parse image URLs safely
-    if (typeof imageUrls === "string") {
-      try {
-        imageUrls = JSON.parse(imageUrls);
-      } catch {
-        imageUrls = imageUrls.split(",").map(url => url.trim());
-      }
-    }
+    // Optional: Delete images from Cloudinary using public_id
+    // You must store public_id separately if needed (not just URLs)
 
-    // Delete each image from filesystem
-    imageUrls.forEach((url) => {
-      const filePath = `.${url}`; // Assuming /uploads/...
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    });
-
-    // Delete product from database
     await pool.query("DELETE FROM products WHERE id = $1", [id]);
 
     res.status(200).json({ message: "Product deleted successfully" });
@@ -101,8 +81,5 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete product" });
   }
 });
-
-
-
 
 module.exports = router;
