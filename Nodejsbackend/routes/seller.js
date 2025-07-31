@@ -8,13 +8,14 @@ const router = express.Router();
 
 // ✅ Setup Cloudinary storage with multer
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
-    folder: "seller",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-    public_id: (req, file) => `${Date.now()}-${file.originalname}`,
+    folder: "seller", // Folder name in Cloudinary
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 800, crop: "limit" }],
   },
 });
+
 
 const upload = multer({ storage });
 
