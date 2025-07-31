@@ -97,7 +97,7 @@ router.post("/add", upload.array("image", 5), async (req, res) => {
 router.get("/all", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM goldloanrequest ORDER BY created_at ASC"
+      "SELECT * FROM goldloanrequest "
     );
 
     const data = result.rows.map((row) => ({
