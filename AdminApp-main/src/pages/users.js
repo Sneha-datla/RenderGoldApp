@@ -9,7 +9,7 @@ const UserManagement = () => {
   // Fetch users from API
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('https://adminapp-1-nk19.onrender.com/users/all');
+      const res = await axios.get('https://rendergoldapp-1.onrender.com/users/all');
       setUsers(res.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -21,7 +21,7 @@ const UserManagement = () => {
     const confirm = window.confirm('Are you sure you want to delete this user?');
     if (!confirm) return;
     try {
-      const res = await axios.delete(`https://adminapp-1-nk19.onrender.com/users/${id}`);
+      const res = await axios.delete(`https://rendergoldapp-1.onrender.com/users/${id}`);
       console.log('User deleted:', res.data);
       alert(`Deleted user ID: ${id}`);
       fetchUsers();
