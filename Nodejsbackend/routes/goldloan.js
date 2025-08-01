@@ -117,8 +117,8 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Record not found" });
     }
 
-    const record = result.rows[0];
-    const imagePaths = JSON.parse(record.image || "[]");
+  
+    const imagePaths = result.rows[0].image || [];
 
     // ✅ Delete images from Cloudinary
      await Promise.all(
