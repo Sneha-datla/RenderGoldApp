@@ -115,7 +115,11 @@ router.get("/all", async (req, res) => {
  */
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
-
+  const getPublicIdFromUrl = (url) => {
+    const parts = url.split("/");
+    const filename = parts[parts.length - 1].split(".")[0];
+    return `goldloan/${filename}`;
+  };
   try {
     const result = await pool.query(
       "SELECT * FROM goldloanrequest WHERE id = $1",
@@ -130,16 +134,13 @@ router.delete("/:id", async (req, res) => {
     const imagePaths = JSON.parse(record.image || "[]");
 
     // ✅ Delete images from Cloudinary
-    await Promise.all(
-      imagePaths.map(async (img) => {
-        try {
-          const publicId = img.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`goldloan/${publicId}`);
-        } catch (err) {
-          console.warn("Failed to delete Cloudinary image:", img, err.message);
-        }
-      })
-    );
+     await Promise.all(
+        imagePaths.map((url) => {
+           const publicId = getPublicIdFromUrl(url);
+           return cloudinary.uploader.destroy(publicId);
+         })
+       );
+   
 
     // ✅ Delete from PostgreSQL
     await pool.query("DELETE FROM goldloanrequest WHERE id = $1", [id]);
