@@ -94,23 +94,21 @@ router.post("/add", upload.array("image", 5), async (req, res) => {
 /**
  * 🔹 GET /goldloan/all
  */
+// ✅ Fetch all gold loan requests
 router.get("/all", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM goldloanrequest "
-    );
+    const result = await pool.query("SELECT * FROM goldloanrequest ORDER BY created_at DESC");
 
-    const data = result.rows.map((row) => ({
-      ...row,
-      image: JSON.parse(row.image || "[]"), // Parse image array back from JSON
-    }));
-
-    res.status(200).json(data);
+    res.status(200).json({
+      message: "All gold loan requests fetched successfully",
+      data: result.rows,
+    });
   } catch (err) {
-    console.error("Error fetching records:", err);
-    res.status(500).json({ error: "Failed to fetch records" });
+    console.error("Error fetching gold loan requests:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
+
 
 /**
  * 🔹 DELETE /goldloan/:id
