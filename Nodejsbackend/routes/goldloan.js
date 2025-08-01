@@ -70,20 +70,7 @@ router.post("/add", upload.array("image", 5), async (req, res) => {
 
     res.status(201).json({
       message: "Gold loan request added successfully",
-      id: result.rows[0].id,
-      data: {
-        image: imagePaths,
-        bank,
-        fullname,
-        mobile,
-        address,
-        goldweight,
-        goldtype,
-        idproof,
-        loanamount: parseFloat(loanamount),
-        remarks,
-        createdAt,
-      },
+      data: result.rows[0]
     });
   } catch (err) {
     console.error("Error inserting gold loan request:", err);
