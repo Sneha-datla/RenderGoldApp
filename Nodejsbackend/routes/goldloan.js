@@ -109,7 +109,7 @@ router.delete("/:id", async (req, res) => {
   };
   try {
     const result = await pool.query(
-      "SELECT * FROM goldloanrequest WHERE id = $1",
+       "SELECT image FROM goldloanrequest WHERE id = $1",
       [id]
     );
 
