@@ -10,7 +10,7 @@ const GoldLoanTable = () => {
   const fetchLoans = async () => {
     try {
       const response = await axios.get(API_URL);
-      setLoans(response.data.data);
+      setLoans(response.data);
     } catch (error) {
       console.error('Error fetching gold loan requests:', error);
     }
