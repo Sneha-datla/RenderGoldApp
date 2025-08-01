@@ -8,12 +8,17 @@ const OrderTable = () => {
   const [purityFilter, setPurityFilter] = useState('');
   const [priceFilter, setPriceFilter] = useState('');
 
-  useEffect(() => {
+ useEffect(() => {
   const fetchOrders = async () => {
     try {
       const response = await fetch(`https://rendergoldapp-1.onrender.com/order/all`);
       const data = await response.json();
-setOrders(Array.isArray(data) ? data : data.orders || []);
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } else {
+        console.error('Unexpected response format:', data);
+        setOrders([]); // fallback
+      }
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -23,6 +28,7 @@ setOrders(Array.isArray(data) ? data : data.orders || []);
 
   fetchOrders();
 }, []);
+
 
 const handleStatusChange = async (orderId, newStatus) => {
   try {
@@ -100,7 +106,7 @@ const handleStatusChange = async (orderId, newStatus) => {
           <tbody>
             {orders.length > 0 ? (
               orders.flatMap((order, orderIndex) =>
-               (order.orderSummary || [])
+               (order.order_summary|| [])
   .filter(item => {
     const matchTitle = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchPurity = purityFilter === '' || item.purity === purityFilter;
@@ -115,7 +121,7 @@ const handleStatusChange = async (orderId, newStatus) => {
                   .map((item, itemIndex) => (
                     <tr key={`${orderIndex}-${itemIndex}`}>
                       <td>
-                        <img src={item.image[0]} alt={item.title} width="50" />
+              <img src={item.image} alt={item.name} width="50" />
                       </td>
                       <td>{item.name}</td>
                       <td>{item.quantity}</td>
