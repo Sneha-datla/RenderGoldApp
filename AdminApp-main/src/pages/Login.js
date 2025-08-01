@@ -1,141 +1,165 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios"; 
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+const LoginForm = () => {
+  const [formData, setFormData] = useState({
+    identifier: '', // Email or phone
+    password: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate(); // 👈 for programmatic navigation
 
-const handleLogin = async () => {
-  if (!email || !password) {
-    alert("Please enter both email and password.");
-    return;
-  }
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
+  };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setSuccess('');
 
   try {
     const response = await axios.post(
       "https://rendergoldapp-1.onrender.com/users/login",
       {
-        identifier: email,
-        password: password,
+        identifier: formData.identifier,
+        password: formData.password,
       },
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
-    console.log("Login successful:", response.data);
-    // Optionally store user data or token here
-    navigate("/Dashboard"); // Redirect on successful login
+    const user = response.data?.user;
+
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+      setSuccess('Login successful!');
+      console.log('Login Response:', user);
+      navigate("/users");
+    } else {
+      setError('Invalid user data received');
+    }
   } catch (err) {
-    console.error("Login error:", err);
-    alert("Invalid email or password");
+    setError('Invalid credentials');
+    console.error(err);
   }
 };
 
+
+
+
+
   return (
     <div style={styles.container}>
-      <div style={styles.leftPane}>
-        <img
-          src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png"
-          alt="shield"
-          style={styles.image}
+      <h2 style={styles.header}>Welcome Back</h2>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          type="text"
+          name="identifier"
+          placeholder="Email or Username"
+          value={formData.identifier}
+          onChange={handleChange}
+          style={styles.input}
         />
-      </div>
-      <div style={styles.rightPane}>
-        <div style={styles.form}>
-          <h2 style={styles.logo}>
-            <span role="img" aria-label="shield">🛡️</span>
-            <span style={{ fontWeight: "bold" }}>Admin</span>Panel
-          </h2>
-          <h3>Welcome Back</h3>
+        <div style={styles.passwordWrapper}>
           <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            style={{ ...styles.input, marginBottom: 0 }}
           />
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-          />
-          <div style={styles.options}>
-            <label>
-              <input type="checkbox" /> Remember me
-            </label>
-          </div>
-          <button style={styles.button} onClick={handleLogin}>
-            ➜ Sign In
-          </button>
+          <span onClick={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+            {showPassword ? '🙈' : '👁️'}
+          </span>
         </div>
-      </div>
+        <div style={styles.forgotContainer}>
+          <span style={styles.forgot}>Forgot Password?</span>
+        </div>
+        {error && <p style={styles.error}>{error}</p>}
+        {success && <p style={styles.success}>{success}</p>}
+        
+  <button className="btn btn-warning text-white" style={styles.button}>Login</button>
+
+      </form>
     </div>
   );
 };
 
 const styles = {
   container: {
-    display: "flex",
-    height: "100vh",
-    fontFamily: "Arial, sans-serif",
+    maxWidth: 400,
+    margin: 'auto',
+    padding: 20,
+    fontFamily: 'Arial, sans-serif',
   },
-  leftPane: {
-    flex: 1,
-    background: "linear-gradient(to bottom right, #f6a100, #e38e00)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image: {
-    width: "200px",
-    height: "200px",
-  },
-  rightPane: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+  header: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 30,
+    fontSize: 24,
   },
   form: {
-    background: "#fff",
-    padding: "40px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-    minWidth: "300px",
-  },
-  logo: {
-    color: "#e38e00",
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 15,
   },
   input: {
-    width: "100%",
-    padding: "12px",
-    margin: "10px 0",
-    border: "1px solid #ddd",
-    borderRadius: "5px",
+    padding: 12,
+    border: '1px solid #ccc',
+    borderRadius: 8,
+    fontSize: 16,
+    width: '100%',
   },
-  options: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "14px",
-    marginBottom: "20px",
+  passwordWrapper: {
+    position: 'relative',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+    cursor: 'pointer',
+    fontSize: 18,
+  },
+  forgotContainer: {
+    textAlign: 'right',
+    marginTop: 4,
+  },
+  forgot: {
+    color: '#FEC601',
+    fontWeight: 'bold',
+    fontSize: 14,
+    cursor: 'pointer',
   },
   button: {
-    width: "100%",
-    backgroundColor: "#e38e00",
-    color: "#fff",
-    padding: "12px",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
+    backgroundColor: '#FEC601',
+    border: 'none',
+    color: '#000',
+    padding: 14,
+    fontSize: 16,
+    fontWeight: 'bold',
+    borderRadius: 10,
+    cursor: 'pointer',
+    marginTop: 10,
+  },
+  error: {
+    color: 'red',
+    fontWeight: 'bold',
+    marginTop: -10,
+  },
+  success: {
+    color: 'green',
+    fontWeight: 'bold',
+    marginTop: -10,
   },
 };
 
-export default Login;
+export default LoginForm;
