@@ -129,19 +129,19 @@ router.delete("/:id", async (req, res) => {
     const record = result.rows[0];
     const imagePaths = JSON.parse(record.image || "[]");
 
-    // Delete images from Cloudinary
+    // ✅ Delete images from Cloudinary
     await Promise.all(
-      imagePaths.map(async (url) => {
+      imagePaths.map(async (img) => {
         try {
-          const publicId = url.split("/").pop().split(".")[0]; // crude way to get public ID
+          const publicId = img.split('/').pop().split('.')[0];
           await cloudinary.uploader.destroy(`goldloan/${publicId}`);
         } catch (err) {
-          console.warn("Failed to delete Cloudinary image:", err.message);
+          console.warn("Failed to delete Cloudinary image:", img, err.message);
         }
       })
     );
 
-    // Delete from PostgreSQL
+    // ✅ Delete from PostgreSQL
     await pool.query("DELETE FROM goldloanrequest WHERE id = $1", [id]);
 
     res.status(200).json({ message: "Gold loan request deleted successfully" });
