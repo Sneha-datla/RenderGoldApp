@@ -106,6 +106,7 @@ router.post("/checkout", async (req, res) => {
   try {
     await client.query("BEGIN");
 
+    // Fetch address
     const addressRes = await client.query(
       "SELECT * FROM addresses WHERE user_id = $1 AND id = $2",
       [userId, addressId]
@@ -115,7 +116,11 @@ router.post("/checkout", async (req, res) => {
     }
     const address = addressRes.rows[0];
 
-    const cartRes = await client.query("SELECT * FROM carts WHERE user_id = $1", [userId]);
+    // Fetch cart items
+    const cartRes = await client.query(
+      "SELECT * FROM carts WHERE user_id = $1",
+      [userId]
+    );
     if (cartRes.rowCount === 0) {
       return res.status(400).json({ error: "No items in cart" });
     }
@@ -131,25 +136,32 @@ router.post("/checkout", async (req, res) => {
 
     const totalAmount = subtotal;
 
-    const orderRes = await client.query(
-      `INSERT INTO orders (user_id, address_id, address, payment_method, expected_delivery, subtotal, total_amount, status, order_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'processing', NOW()) RETURNING id`,
-      [userId, addressId, JSON.stringify(address), paymentMethod, expectedDelivery, subtotal, totalAmount]
+    // Insert into orders with JSONB order_summary
+    await client.query(
+      `INSERT INTO orders (
+         user_id, address_id, address, payment_method,
+         expected_delivery, subtotal, total_amount,
+         order_summary, status, order_date
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'processing', NOW())`,
+      [
+        userId,
+        addressId,
+        JSON.stringify(address),
+        paymentMethod,
+        expectedDelivery,
+        subtotal,
+        totalAmount,
+        JSON.stringify(orderSummary)
+      ]
     );
-    const orderId = orderRes.rows[0].id;
 
-    for (const item of orderSummary) {
-      await client.query(
-        `INSERT INTO order_summary (order_id, name, price, quantity, purity, image)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [orderId, item.name, item.price, item.quantity, item.purity, item.image]
-      );
-    }
-
+    // Clear cart after order
     await client.query("DELETE FROM carts WHERE user_id = $1", [userId]);
-    await client.query("COMMIT");
 
+    await client.query("COMMIT");
     res.status(200).json({ message: "Order placed successfully" });
+
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("Checkout Error:", error);
