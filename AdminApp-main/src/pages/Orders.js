@@ -11,7 +11,7 @@ const OrderTable = () => {
   useEffect(() => {
   const fetchOrders = async () => {
     try {
-      const response = await fetch(`https://adminapp-1-gack.onrender.com/order/all`);
+      const response = await fetch(`https://rendergoldapp-1.onrender.com/order/all`);
       const data = await response.json();
 setOrders(Array.isArray(data) ? data : data.orders || []);
     } catch (error) {
@@ -27,7 +27,7 @@ setOrders(Array.isArray(data) ? data : data.orders || []);
 const handleStatusChange = async (orderId, newStatus) => {
   try {
     // Call your backend API to update the status in the database
-    const res = await fetch('https://adminapp-1-gack.onrender.com/order/update-status', {
+    const res = await fetch('https://rendergoldapp-1.onrender.com/order/update-status', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

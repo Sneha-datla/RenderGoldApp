@@ -10,7 +10,7 @@ const SelectDeliveryAddress = () => {
       const user = JSON.parse(localStorage.getItem('user')); // or just use 'userId' if you only store that
       if (user && user.id) {
         try {
-          const res = await fetch(`https://adminapp-1-nk19.onrender.com/users/loginaddress?userId=${user.id}`);
+          const res = await fetch(`https://rendergoldapp-1.onrender.com/users/loginaddress?userId=${user.id}`);
           const data = await res.json();
           setAddresses(data);
         } catch (err) {

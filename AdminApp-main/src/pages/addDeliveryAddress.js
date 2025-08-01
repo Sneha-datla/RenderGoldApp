@@ -48,7 +48,7 @@ const AddDeliveryAddress = () => {
     };
 
     try {
-      const response = await fetch('https://adminapp-1-nk19.onrender.com/users/addresses', {
+      const response = await fetch('https://rendergoldapp-1.onrender.com/users/addresses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
