@@ -75,14 +75,15 @@ router.delete("/:id", async (req, res) => {
     const imagePaths = Result.rows[0].images || [];
 
     // Delete images from the filesystem
-    imagePaths.forEach((imagePath) => {
-      const filePath = imagePath.replace("/uploads/", "uploads/");
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.warn(`Failed to delete file: ${filePath}`, err.message);
-        }
-      });
-    });
+    await Promise.all(
+        imagePaths.map(async (img) => {
+          try {
+            await cloudinary.uploader.destroy(img.public_id);
+          } catch (err) {
+            console.warn("Failed to delete Cloudinary image:", img.public_id, err.message);
+          }
+        })
+      );
 
     // Delete the product from the database
     await pool.query("DELETE FROM sellergold WHERE id = $1", [id]);
