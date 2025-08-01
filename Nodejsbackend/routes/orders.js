@@ -5,13 +5,15 @@ const router = express.Router();
 // ✅ GET /orders/list/:userId
 router.get('/list/:userId', async (req, res) => {
   const { userId } = req.params;
+
   try {
-    const ordersResult = await pool.query("SELECT * FROM orders WHERE user_id = $1", [userId]);
+    const ordersResult = await pool.query("SELECT * FROM orders WHERE user_id = $1 ", [userId]);
     const orders = [];
 
     for (const order of ordersResult.rows) {
-      const summaryResult = await pool.query("SELECT * FROM order_summary WHERE order_id = $1", [order.id]);
-      const formattedProducts = summaryResult.rows.map(item => ({
+      const orderSummary = order.order_summary || [];
+
+      const formattedProducts = orderSummary.map(item => ({
         title: item.name || "Unknown Product",
         quantity: item.quantity || 1,
         purity: item.purity || null,
@@ -25,7 +27,7 @@ router.get('/list/:userId', async (req, res) => {
         status: order.status,
         address: order.address,
         totalAmount: parseFloat(order.total_amount),
-        ordersummary: formattedProducts
+        ordersummary: formattedProducts,
       });
     }
 
@@ -35,6 +37,7 @@ router.get('/list/:userId', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
+
 
 // ✅ GET /orders/all
 router.get("/all", async (req, res) => {
