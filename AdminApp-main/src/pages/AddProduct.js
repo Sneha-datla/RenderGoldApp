@@ -98,6 +98,17 @@ const handleSubmit = async (e) => {
           </select>
         </div>
 
+            <div style={styles.formGroup}>
+          <label>Weight</label>
+          <input
+            type="text"
+            name="weight"
+            value={product.weight}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
         <div style={styles.formGroup}>
           <label>Price</label>
           <input
