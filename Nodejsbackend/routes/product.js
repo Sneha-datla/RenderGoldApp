@@ -25,23 +25,24 @@ const upload = multer({ storage });
 
 // ✅ Add product with image upload
 router.post("/add", upload.array("image_urls", 10), async (req, res) => {
-  const { productId, title, purity, price, stock, featured } = req.body;
+  const { productId, title, purity, weight,price, stock, featured } = req.body;
   const files = req.files || [];
 
   try {
     const imageUrls = files.map((file) => file.path);
 
     const result = await pool.query(
-      `INSERT INTO products (product_id, title, purity, price, stock, featured, image_urls, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      `INSERT INTO products (product_id, title, purity, weight,price, stock, featured, image_urls, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7,$8, NOW())
        RETURNING *`,
       [
         productId,
         title,
         purity,
+        weight,
         parseFloat(price),
         parseInt(stock),
-        featured === "true",
+        featured ,
         imageUrls,
       ]
     );
