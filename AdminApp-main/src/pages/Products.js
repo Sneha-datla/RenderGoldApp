@@ -167,12 +167,13 @@ await axios.delete(`https://rendergoldapp-1.onrender.com/products/${id}`);
                    
                   <td>
                     <span
-                      className={`badge ${
-                        product.featured === 'Yes' ? 'bg-success' : 'bg-secondary'
-                      }`}
-                    >
-                      {product.featured}
-                    </span>
+  className={`badge ${
+    product.featured === true || product.featured === 'true' ? 'bg-success' : 'bg-secondary'
+  }`}
+>
+  {product.featured === true || product.featured === 'true' ? 'Yes' : 'No'}
+</span>
+
                   </td>
 <td>
   {(Array.isArray(product.image_urls)
