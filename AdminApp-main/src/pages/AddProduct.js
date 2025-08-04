@@ -5,6 +5,7 @@ const AddProduct = () => {
     productId: '',
     title: '',
     purity: '',
+    weight:'',
     price: '',
     stock: '',
     featured: 'No',
@@ -31,7 +32,8 @@ const handleSubmit = async (e) => {
   formData.append("productId", product.productId);
   formData.append("title", product.title);
   formData.append("purity", product.purity);
-  formData.append("price", product.price);
+    formData.append("weight", product.weight);
+formData.append("price", product.price);
   formData.append("stock", product.stock);
   formData.append("featured", product.featured);
 
