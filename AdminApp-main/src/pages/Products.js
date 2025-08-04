@@ -145,6 +145,7 @@ await axios.delete(`https://rendergoldapp-1.onrender.com/products/${id}`);
               <th>Product ID</th>
               <th>Title</th>
               <th>Purity</th>
+               <th>weight</th>
               <th>Price</th>
               <th>Stock</th>
               <th>Featured</th>
@@ -160,6 +161,7 @@ await axios.delete(`https://rendergoldapp-1.onrender.com/products/${id}`);
                   <td>{product.product_id}</td>
                   <td>{product.title}</td>
                   <td>{product.purity}</td>
+                    <td>{product.weight}</td>
                   <td>{product.price}</td>
                   <td>{product.stock}</td>
                    
