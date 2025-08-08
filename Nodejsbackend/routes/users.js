@@ -71,11 +71,11 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/forgot-password', async (req, res) => {
-  const { email, newPassword, confirmPassword } = req.body;
+  const { userId, email, newPassword, confirmPassword } = req.body;
 
   try {
     // 1. Validate input
-    if (!email || !newPassword || !confirmPassword) {
+    if (!userId || !email || !newPassword || !confirmPassword) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -83,20 +83,23 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 
-    // 2. Check if user exists
-    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    // 2. Check if user exists by both ID and email
+    const user = await pool.query(
+      'SELECT * FROM users WHERE id = $1 AND email = $2',
+      [userId, email]
+    );
 
     if (user.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'User not found with provided ID and email' });
     }
 
     // 3. Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // 4. Update the password in the database
+    // 4. Update password in the database
     await pool.query(
-      'UPDATE users SET password = $1 WHERE email = $2',
-      [hashedPassword, email]
+      'UPDATE users SET password = $1 WHERE id = $2 AND email = $3',
+      [hashedPassword, userId, email]
     );
 
     res.status(200).json({ message: 'Password updated successfully' });
