@@ -50,6 +50,25 @@ router.get("/all", async (req, res) => {
   }
 });
 
+// ✅ DELETE /orders/delete/:orderId
+router.delete('/delete/:orderId', async (req, res) => {
+  const { orderId } = req.params;
+
+  try {
+    const result = await pool.query("DELETE FROM orders WHERE id = $1 RETURNING *", [orderId]);
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json({ message: "Order deleted successfully", order: result.rows[0] });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 // ✅ POST /addcart
 router.post('/addcart', async (req, res) => {
   const { userId, product } = req.body;
