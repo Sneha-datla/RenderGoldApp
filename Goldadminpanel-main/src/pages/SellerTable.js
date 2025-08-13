@@ -1,13 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Lightbox from "react-image-lightbox";
-import "react-image-lightbox/style.css";
 
 const SellerProductTable = () => {
   const [products, setProducts] = useState([]);
   const [activeProduct, setActiveProduct] = useState(null);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [enlargedImage, setEnlargedImage] = useState(null);
 
   const API_URL = "https://rendergoldapp-1.onrender.com/seller/all";
   const IMAGE_BASE = "https://adminapp-1-nk19.onrender.com";
@@ -55,11 +52,6 @@ const SellerProductTable = () => {
     setActiveProduct(product.id === activeProduct?.id ? null : product);
   };
 
-  const openLightbox = (index) => {
-    setLightboxIndex(index);
-    setIsLightboxOpen(true);
-  };
-
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -104,6 +96,11 @@ const SellerProductTable = () => {
                         borderRadius: "6px",
                         marginRight: "6px",
                         border: "1px solid #ddd",
+                        cursor: "pointer",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEnlargedImage(getImageUrl(imgUrl));
                       }}
                     />
                   ))}
@@ -163,7 +160,7 @@ const SellerProductTable = () => {
                         scrollSnapAlign: "start",
                         cursor: "pointer",
                       }}
-                      onClick={() => openLightbox(i)}
+                      onClick={() => setEnlargedImage(getImageUrl(imgUrl))}
                     >
                       <img
                         src={getImageUrl(imgUrl)}
@@ -195,33 +192,29 @@ const SellerProductTable = () => {
         </div>
       )}
 
-      {isLightboxOpen && activeProduct && (
-        <Lightbox
-          mainSrc={getImageUrl(parseImages(activeProduct.images)[lightboxIndex])}
-          nextSrc={getImageUrl(
-            parseImages(activeProduct.images)[
-              (lightboxIndex + 1) % parseImages(activeProduct.images).length
-            ]
-          )}
-          prevSrc={getImageUrl(
-            parseImages(activeProduct.images)[
-              (lightboxIndex + parseImages(activeProduct.images).length - 1) %
-                parseImages(activeProduct.images).length
-            ]
-          )}
-          onCloseRequest={() => setIsLightboxOpen(false)}
-          onMovePrevRequest={() =>
-            setLightboxIndex(
-              (lightboxIndex + parseImages(activeProduct.images).length - 1) %
-                parseImages(activeProduct.images).length
-            )
-          }
-          onMoveNextRequest={() =>
-            setLightboxIndex(
-              (lightboxIndex + 1) % parseImages(activeProduct.images).length
-            )
-          }
-        />
+      {enlargedImage && (
+        <div
+          onClick={() => setEnlargedImage(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            cursor: "pointer",
+          }}
+        >
+          <img
+            src={enlargedImage}
+            alt="Enlarged"
+            style={{ maxHeight: "90%", maxWidth: "90%", borderRadius: "8px" }}
+          />
+        </div>
       )}
     </div>
   );

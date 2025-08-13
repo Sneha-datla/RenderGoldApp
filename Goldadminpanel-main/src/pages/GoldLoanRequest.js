@@ -1,13 +1,9 @@
-import axios from 'axios';
+import axios from 'axios'; 
 import { useEffect, useState } from 'react';
-import Lightbox from 'yet-another-react-lightbox';
-import 'yet-another-react-lightbox/styles.css';
 
 const GoldLoanTable = () => {
   const [loans, setLoans] = useState([]);
   const [activeLoan, setActiveLoan] = useState(null);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const API_URL = 'https://rendergoldapp-1.onrender.com/loan/all';
 
@@ -44,11 +40,6 @@ const GoldLoanTable = () => {
 
   const handleRowClick = (loan) => {
     setActiveLoan(loan.id === activeLoan?.id ? null : loan);
-  };
-
-  const openLightbox = (index) => {
-    setLightboxIndex(index);
-    setLightboxOpen(true);
   };
 
   useEffect(() => {
@@ -95,11 +86,6 @@ const GoldLoanTable = () => {
                         objectFit: 'cover',
                         borderRadius: '4px',
                         marginRight: '5px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openLightbox(i);
                       }}
                     />
                   ))}
@@ -148,12 +134,10 @@ const GoldLoanTable = () => {
                   src={imgUrl}
                   alt={`Gold item ${i + 1}`}
                   style={{
-                    cursor: 'pointer',
                     borderRadius: '6px',
                     display: 'block',
                     marginBottom: '8px',
                   }}
-                  onClick={() => openLightbox(i)}
                 />
               ))}
             </div>
@@ -170,17 +154,6 @@ const GoldLoanTable = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Fullscreen Lightbox */}
-      {lightboxOpen && activeLoan && (
-        <Lightbox
-          open={lightboxOpen}
-          close={() => setLightboxOpen(false)}
-          index={lightboxIndex}
-          slides={parseImages(activeLoan.image).map((img) => ({ src: img }))}
-          carousel={{ finite: false }} // loop mode
-        />
       )}
     </div>
   );
