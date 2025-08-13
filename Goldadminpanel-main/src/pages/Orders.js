@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; 
 import * as XLSX from 'xlsx';
-import Lightbox from 'yet-another-react-lightbox';
-import 'yet-another-react-lightbox/styles.css';
 import '../App.css';
 
 const OrderTable = () => {
@@ -10,11 +8,6 @@ const OrderTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [purityFilter, setPurityFilter] = useState('');
   const [priceFilter, setPriceFilter] = useState('');
-
-  // Lightbox state
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxImages, setLightboxImages] = useState([]);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -59,16 +52,8 @@ const OrderTable = () => {
     }
   };
 
-  const openLightbox = (imagesArray, startIndex) => {
-    const slides = imagesArray.map(img => ({ src: img }));
-    setLightboxImages(slides);
-    setLightboxIndex(startIndex);
-    setLightboxOpen(true);
-  };
-
   // 📦 Export to Excel
   const exportToExcel = () => {
-    // Flatten all order data into rows
     const exportData = [];
 
     orders.forEach(order => {
@@ -92,12 +77,9 @@ const OrderTable = () => {
       });
     });
 
-    // Create worksheet and workbook
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Orders');
-
-    // Download Excel file
     XLSX.writeFile(wb, 'orders.xlsx');
   };
 
@@ -161,60 +143,46 @@ const OrderTable = () => {
 
                     return matchTitle && matchPurity && matchPrice;
                   })
-                  .map((item, itemIndex) => {
-                    const allImages = [item.image, ...(item.extraImages || [])];
-                    return (
-                      <tr key={`${orderIndex}-${itemIndex}`}>
-                        <td>
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            style={{ width: '100px', height: 'auto', cursor: 'pointer' }}
-                            onClick={() => openLightbox(allImages, 0)}
-                          />
-                        </td>
-                        <td>{item.name}</td>
-                        <td>{item.quantity}</td>
-                        <td><span className="purity-badge">{item.purity}</span></td>
-                        <td>${item.price?.toLocaleString()}</td>
-                        <td>
-                          {order.address ? (
-                            <div className="address-info">
-                              <strong>{order.address.name}</strong><br />
-                              {order.address.flat}, {order.address.street}<br />
-                              {order.address.city}, {order.address.state} - {order.address.pincode}<br />
-                              <small>{order.address.mobile}</small><br />
-                              <em>{order.address.addressType}</em>
-                            </div>
-                          ) : (
-                            'No address found'
-                          )}
-                        </td>
-                        <td><span className="status-badge">{order.status || 'Processing'}</span></td>
-                        <td>
-                          <button onClick={() => handleStatusChange(order.id, 'processing')} className="btn-processing">🕐 Processing</button>
-                          <button onClick={() => handleStatusChange(order.id, 'approved')} className="btn-approve">✅ Approve</button>
-                          <button onClick={() => handleStatusChange(order.id, 'completed')} className="btn-complete">🏁 Complete</button>
-                        </td>
-                      </tr>
-                    );
-                  })
+                  .map((item, itemIndex) => (
+                    <tr key={`${orderIndex}-${itemIndex}`}>
+                      <td>
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          style={{ width: '100px', height: 'auto' }}
+                        />
+                      </td>
+                      <td>{item.name}</td>
+                      <td>{item.quantity}</td>
+                      <td><span className="purity-badge">{item.purity}</span></td>
+                      <td>${item.price?.toLocaleString()}</td>
+                      <td>
+                        {order.address ? (
+                          <div className="address-info">
+                            <strong>{order.address.name}</strong><br />
+                            {order.address.flat}, {order.address.street}<br />
+                            {order.address.city}, {order.address.state} - {order.address.pincode}<br />
+                            <small>{order.address.mobile}</small><br />
+                            <em>{order.address.addressType}</em>
+                          </div>
+                        ) : (
+                          'No address found'
+                        )}
+                      </td>
+                      <td><span className="status-badge">{order.status || 'Processing'}</span></td>
+                      <td>
+                        <button onClick={() => handleStatusChange(order.id, 'processing')} className="btn-processing">🕐 Processing</button>
+                        <button onClick={() => handleStatusChange(order.id, 'approved')} className="btn-approve">✅ Approve</button>
+                        <button onClick={() => handleStatusChange(order.id, 'completed')} className="btn-complete">🏁 Complete</button>
+                      </td>
+                    </tr>
+                  ))
               )
             ) : (
               <tr><td colSpan="8">No orders found</td></tr>
             )}
           </tbody>
         </table>
-      )}
-
-      {lightboxOpen && (
-        <Lightbox
-          open={lightboxOpen}
-          close={() => setLightboxOpen(false)}
-          slides={lightboxImages}
-          index={lightboxIndex}
-          carousel={{ finite: false }}
-        />
       )}
     </div>
   );
