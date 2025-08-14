@@ -64,8 +64,8 @@ const Dashboard = () => {
 
         // Get total loan request users
         const loansRes = await axios.get('https://rendergoldapp-1.onrender.com/loan/all');
-        if (Array.isArray(loansRes.data)) {
-          setTotalLoans(loansRes.data.length);
+        if (Array.isArray(loansRes.data.data)) {
+          setTotalLoans(loansRes.data.data.length);
         }
 
         // Get product data for chart
