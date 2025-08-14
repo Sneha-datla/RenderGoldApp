@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'; 
+import { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 import '../App.css';
+import {  FaTrash } from 'react-icons/fa';
 
 const OrderTable = () => {
   const [orders, setOrders] = useState([]);
@@ -49,6 +50,25 @@ const OrderTable = () => {
       }
     } catch (err) {
       console.error('Error updating order status:', err);
+    }
+  };
+
+  const handleDelete = async (orderId) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+
+    try {
+      const res = await fetch(`https://rendergoldapp-1.onrender.com/order/delete/${orderId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setOrders(orders.filter(order => order.id !== orderId));
+      } else {
+        const result = await res.json();
+        console.error('Failed to delete order:', result.message);
+      }
+    } catch (err) {
+      console.error('Error deleting order:', err);
     }
   };
 
@@ -130,20 +150,21 @@ const OrderTable = () => {
           </thead>
           <tbody>
             {orders.length > 0 ? (
-              orders.flatMap((order, orderIndex) =>
-                (order.order_summary || [])
-                  .filter(item => {
-                    const matchTitle = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase());
-                    const matchPurity = purityFilter === '' || item.purity === purityFilter;
-                    const matchPrice =
-                      priceFilter === '' ||
-                      (priceFilter === 'low' && item.price < 10000) ||
-                      (priceFilter === 'mid' && item.price >= 10000 && item.price <= 30000) ||
-                      (priceFilter === 'high' && item.price > 30000);
+              orders.flatMap((order, orderIndex) => {
+                const filteredItems = (order.order_summary || []).filter(item => {
+                  const matchTitle = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchPurity = purityFilter === '' || item.purity === purityFilter;
+                  const matchPrice =
+                    priceFilter === '' ||
+                    (priceFilter === 'low' && item.price < 10000) ||
+                    (priceFilter === 'mid' && item.price >= 10000 && item.price <= 30000) ||
+                    (priceFilter === 'high' && item.price > 30000);
 
-                    return matchTitle && matchPurity && matchPrice;
-                  })
-                  .map((item, itemIndex) => (
+                  return matchTitle && matchPurity && matchPrice;
+                });
+
+                return [
+                  ...filteredItems.map((item, itemIndex) => (
                     <tr key={`${orderIndex}-${itemIndex}`}>
                       <td>
                         <img
@@ -176,8 +197,20 @@ const OrderTable = () => {
                         <button onClick={() => handleStatusChange(order.id, 'completed')} className="btn-complete">🏁 Complete</button>
                       </td>
                     </tr>
-                  ))
-              )
+                  )),
+                 <tr key={`delete-${order.id}`}>
+  <td colSpan="8" style={{ textAlign: 'center' }}>
+    <button
+      className="btn btn-sm btn-outline-danger action-btn"
+      onClick={() => handleDelete(order.id)}
+    >
+      <FaTrash />
+    </button>
+  </td>
+</tr>
+
+                ];
+              })
             ) : (
               <tr><td colSpan="8">No orders found</td></tr>
             )}
