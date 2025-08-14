@@ -146,6 +146,7 @@ const OrderTable = () => {
               <th>Addresses</th>
               <th>Status</th>
               <th>Actions</th>
+               <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -196,10 +197,7 @@ const OrderTable = () => {
                         <button onClick={() => handleStatusChange(order.id, 'approved')} className="btn-approve">✅ Approve</button>
                         <button onClick={() => handleStatusChange(order.id, 'completed')} className="btn-complete">🏁 Complete</button>
                       </td>
-                    </tr>
-                  )),
-                 <tr key={`delete-${order.id}`}>
-  <td colSpan="8" style={{ textAlign: 'center' }}>
+                       <td>
     <button
       className="btn btn-sm btn-outline-danger action-btn"
       onClick={() => handleDelete(order.id)}
@@ -207,8 +205,9 @@ const OrderTable = () => {
       <FaTrash />
     </button>
   </td>
-</tr>
-
+                    </tr>
+                  ))
+                 
                 ];
               })
             ) : (
