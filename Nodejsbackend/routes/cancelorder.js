@@ -56,7 +56,7 @@ router.post("/add", async (req, res) => {
 router.get("/all", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, status, cancellation_reason
+      `SELECT id, user_id,status, cancellation_reason
        FROM orders 
        WHERE status = 'cancelled'
        ORDER BY cancelled_at DESC`
