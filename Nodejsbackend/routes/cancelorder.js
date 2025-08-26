@@ -75,7 +75,7 @@ router.get("/all", async (req, res) => {
 // =========================
 router.get("/:userId", async (req, res) => {
   try {
-    const { employeeId } = req.params;
+    const { userId} = req.params;
 
     const result = await pool.query(
       `SELECT id, user_id, status
@@ -86,7 +86,7 @@ router.get("/:userId", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "No orders found for this employee" });
+      return res.status(404).json({ message: "No orders found for this user" });
     }
 
     res.json(result.rows);
