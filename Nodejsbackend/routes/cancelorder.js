@@ -25,22 +25,22 @@ router.post("/add", async (req, res) => {
       return res.status(400).json({ error: "Order is already cancelled" });
     }
 
-    // ✅ Cancel the order
-    await pool.query(
+    // ✅ Cancel the order and fetch updated row
+    const updateResult = await pool.query(
       `UPDATE orders 
        SET status = 'cancelled',
            cancellation_reason = $1,
            cancelled_at = (NOW() AT TIME ZONE 'Asia/Kolkata')
-       WHERE id = $2`,
+       WHERE id = $2
+       RETURNING id, user_id AS "userId", status, cancellation_reason AS "reason", cancelled_at AS "cancelledAt"`,
       [reason, orderId]
     );
 
+    const updatedOrder = updateResult.rows[0];
+
     return res.json({
       message: "Order cancelled successfully",
-      orderId,
-      reason,
-    userId: user_id,   
-   cancelledAt: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      ...updatedOrder,
       refundInfo: "Refund (if applicable) will be processed within 2-3 working days"
     });
 
@@ -49,6 +49,7 @@ router.post("/add", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 // =========================
