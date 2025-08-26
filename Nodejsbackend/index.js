@@ -9,6 +9,8 @@ const userRoutes = require("./routes/users"); //  import your user route
 const sellGoldRoutes = require("./routes/seller"); //  import your user route
 const ordersRoutes = require("./routes/orders"); //  import your user route
 const goldloanRoutes = require("./routes/goldloan"); //  import your user route
+const CancelorderRoutes = require("./routes/cancelorder"); //  import your user route
+
 
 app.use(cors());
 app.use(express.json());
@@ -18,6 +20,8 @@ app.use("/users", userRoutes);
 app.use("/seller", sellGoldRoutes); 
 app.use("/order", ordersRoutes);
 app.use("/loan", goldloanRoutes); 
+app.use("/cancelorder", CancelorderRoutes); 
+
 
 
 
