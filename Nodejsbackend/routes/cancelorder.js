@@ -53,10 +53,10 @@ router.post("/add", async (req, res) => {
 // =========================
 // 2️⃣ Get All Cancelled Orders
 // =========================
-router.get("/cancelled-orders", async (req, res) => {
+router.get("/all", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, employee_id, status, cancellation_reason, cancelled_at 
+      `SELECT id, status, cancellation_reason
        FROM orders 
        WHERE status = 'cancelled'
        ORDER BY cancelled_at DESC`
@@ -73,12 +73,12 @@ router.get("/cancelled-orders", async (req, res) => {
 // =========================
 // 3️⃣ Get All Orders by Employee ID
 // =========================
-router.get("/orders/:employeeId", async (req, res) => {
+router.get("/:employeeId", async (req, res) => {
   try {
     const { employeeId } = req.params;
 
     const result = await pool.query(
-      `SELECT id, employee_id, order_type, quantity, order_value, status, cancelled_at 
+      `SELECT id, employee_id, status
        FROM orders 
        WHERE employee_id = $1
        ORDER BY id DESC`,
@@ -100,7 +100,7 @@ router.get("/orders/:employeeId", async (req, res) => {
 // =========================
 // 4️⃣ Delete Order
 // =========================
-router.delete("/orders/:orderId", async (req, res) => {
+router.delete("/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
 
