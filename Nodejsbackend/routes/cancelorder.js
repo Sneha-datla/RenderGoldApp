@@ -75,14 +75,14 @@ router.get("/all", async (req, res) => {
 // =========================
 router.get("/:userId", async (req, res) => {
   try {
-    const { userId} = req.params;
+    const { userId } = req.params;
 
     const result = await pool.query(
       `SELECT id, user_id, status
        FROM orders 
        WHERE user_id = $1
        ORDER BY id DESC`,
-      [employeeId]
+      [userId]   // ✅ use userId instead of employeeId
     );
 
     if (result.rows.length === 0) {
@@ -91,10 +91,11 @@ router.get("/:userId", async (req, res) => {
 
     res.json(result.rows);
   } catch (error) {
-    console.error("Error fetching employee orders:", error);
+    console.error("Error fetching user orders:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 // =========================
