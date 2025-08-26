@@ -73,14 +73,14 @@ router.get("/all", async (req, res) => {
 // =========================
 // 3️⃣ Get All Orders by Employee ID
 // =========================
-router.get("/:employeeId", async (req, res) => {
+router.get("/:userId", async (req, res) => {
   try {
     const { employeeId } = req.params;
 
     const result = await pool.query(
-      `SELECT id, employee_id, status
+      `SELECT id, user_id, status
        FROM orders 
-       WHERE employee_id = $1
+       WHERE user_id = $1
        ORDER BY id DESC`,
       [employeeId]
     );
