@@ -206,4 +206,52 @@ router.post('/update-status', async (req, res) => {
   }
 });
 
+// Cancel Order API
+router.post("/cancel-order", async (req, res) => {
+  try {
+    const { orderId, reason } = req.body;
+
+    if (!orderId || !reason) {
+      return res.status(400).json({ error: "Order ID and reason are required" });
+    }
+
+    // ✅ Check if order exists and is not already cancelled
+    const orderResult = await pool.query(
+      "SELECT status FROM orders WHERE id = $1",
+      [orderId]
+    );
+
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    if (orderResult.rows[0].status === "cancelled") {
+      return res.status(400).json({ error: "Order is already cancelled" });
+    }
+
+    // ✅ Update order status, reason and cancellation time in Asia/Kolkata timezone
+    await pool.query(
+      `UPDATE orders 
+       SET status = 'cancelled', 
+           cancellation_reason = $1, 
+           cancelled_at = (NOW() AT TIME ZONE 'Asia/Kolkata')
+       WHERE id = $2`,
+      [reason, orderId]
+    );
+
+    return res.json({
+      message: "Order cancelled successfully",
+      orderId,
+      reason,
+      cancelledAt: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      refundInfo: "Refund (if applicable) will be processed within 2-3 working days"
+    });
+
+  } catch (error) {
+    console.error("Error cancelling order:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 module.exports = router;
