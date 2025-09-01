@@ -17,7 +17,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // Add seller gold with multiple images
-router.post("/add", upload.array("images", 10), async (req, res) => {
+router.post("/add", upload.array("images", 10), async (req, res) => { 
   const {
     name,
     category,
@@ -25,7 +25,9 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
     purity,
     condition,
     price,
-    description
+    description,
+    full_name,
+    mobilenumber
   } = req.body;
 
   const files = req.files || [];
@@ -34,10 +36,11 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
     const imagePaths = files.map((file) => file.path);
 
     const result = await pool.query(
-      `INSERT INTO sellergold (name, category, weight, purity, condition, price, description, images)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO sellergold 
+        (name, category, weight, purity, condition, price, description, images, full_name, mobilenumber)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
-      [name, category, weight, purity, condition, price, description, imagePaths]
+      [name, category, weight, purity, condition, price, description, imagePaths, full_name, mobilenumber]
     );
 
     res.status(201).json({
@@ -49,6 +52,7 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
     res.status(500).json({ error: "Failed to add seller gold product" });
   }
 });
+
 router.get("/all", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM sellergold ORDER BY id DESC");
