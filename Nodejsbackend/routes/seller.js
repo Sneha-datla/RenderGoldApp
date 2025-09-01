@@ -27,7 +27,8 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
     price,
     description,
     full_name,
-    mobilenumber
+    mobilenumber,
+    typeofselling   // ✅ new field
   } = req.body;
 
   const files = req.files || [];
@@ -37,10 +38,10 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO sellergold 
-        (name, category, weight, purity, condition, price, description, images, full_name, mobilenumber)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        (name, category, weight, purity, condition, price, description, images, full_name, mobilenumber, typeofselling)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
-      [name, category, weight, purity, condition, price, description, imagePaths, full_name, mobilenumber]
+      [name, category, weight, purity, condition, price, description, imagePaths, full_name, mobilenumber, typeofselling]
     );
 
     res.status(201).json({
@@ -52,6 +53,7 @@ router.post("/add", upload.array("images", 10), async (req, res) => {
     res.status(500).json({ error: "Failed to add seller gold product" });
   }
 });
+
 
 router.get("/all", async (req, res) => {
   try {
